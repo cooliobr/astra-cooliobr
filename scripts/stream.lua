@@ -269,6 +269,27 @@ function channel_init_output(channel_data, output_id)
 
     init_output_module[output_data.config.format](channel_data, output_id)
 end
+-- Adicionando a opção de saída HLS
+init_output_option.hls = function(channel_data, output_id)
+    local output_data = channel_data.output[output_id]
+    
+    -- Configuração específica da saída HLS
+    local hls_config = {
+        upstream = channel_data.tail:stream(),
+        path = output_data.config.path,  -- O caminho no qual os arquivos HLS serão armazenados
+        segment_duration = output_data.config.segment_duration or 10,  -- Duração de cada segmento HLS em segundos
+        playlist_size = output_data.config.playlist_size or 5,  -- Tamanho máximo da playlist HLS
+    }
+
+    output_data.hls = hls_output(hls_config)
+    channel_data.tail = output_data.hls
+end
+
+kill_output_option.hls = function(channel_data, output_id)
+    local output_data = channel_data.output[output_id]
+    output_data.hls = nil
+end
+
 
 function channel_kill_output(channel_data, output_id)
     local output_data = channel_data.output[output_id]
@@ -282,6 +303,23 @@ function channel_kill_output(channel_data, output_id)
     kill_output_module[output_data.config.format](channel_data, output_id)
     channel_data.output[output_id] = { config = output_data.config, }
 end
+-- O HLS
+init_output_module.hls = function(channel_data, output_id)
+    local output_data = channel_data.output[output_id]
+    output_data.output = hls_output({
+        upstream = channel_data.tail:stream(),
+        path = output_data.config.path,
+        segment_duration = output_data.config.segment_duration or 10,
+        playlist_size = output_data.config.playlist_size or 5,
+    })
+end
+
+kill_output_module.hls = function(channel_data, output_id)
+    local output_data = channel_data.output[output_id]
+    output_data.output = nil
+end
+
+
 
 --   ooooooo            ooooo  oooo ooooooooo  oooooooooo
 -- o888   888o           888    88   888    88o 888    888
