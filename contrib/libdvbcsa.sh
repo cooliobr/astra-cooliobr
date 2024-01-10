@@ -19,7 +19,9 @@ ARG_CFLAGS="$3"
 
 VER="1.1.0"
 ARC="libdvbcsa-$VER.tar.gz"
-URL="http://cesbo.com/download/astra/contrib/$ARC"
+URL="https://videolan.c3sl.ufpr.br/libdvbcsa/1.1.0/$ARC"
+rm $ARC -f
+
 
 MAKEFILE="Makefile"
 CONFIG="src/config.h"
